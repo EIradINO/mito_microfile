@@ -8,6 +8,8 @@ import numpy as np
 # 要素を形態素解析し、名詞と形容詞をリストにまとめる
 word_list = []
 text = "どうして空は青いのかがが気になりました"
+text1 = "光の三原色について知りたいです"
+text2 = "葉っぱが好き‼‼"
 char_filters = [UnicodeNormalizeCharFilter()]
 tokenizer = Tokenizer()
 token_filters = [POSKeepFilter(['名詞', '形容詞'])]
@@ -27,11 +29,12 @@ counter = [[], []]
 
 # word_list内の単語とdata_listの文字列を突き合わせて、共通するものを単語ごとに書きだす
 for i in range(2):
-    # data_listi番目の要素を加工したリスト化する
+    # data_listのi番目の要素を加工したリスト化する
     process_data_list = [data[i] for data in data_list]
     match_list = []
     for word in word_list:
         match_list.append([s for s in process_data_list if word in s])
+    # print(match_list)
 
 # 単語ごとに紐づけられた文字列を4C2で総当たりで比べ、共通する単語がある場合はそれをfrequencyに格納する
     frequency = []
@@ -39,6 +42,7 @@ for i in range(2):
         common = set(el[0]) & set(el[1])
         if common:
             frequency.append(list(common))
+    # print(frequency)
 
 # frequencyの中にどの文字列がどれくらい出てきたのかを数えて、counterに格納する。
     for count in process_data_list:
@@ -46,17 +50,20 @@ for i in range(2):
             list(itertools.chain.from_iterable(frequency)).count(count))
 # タイトルと説明文の一致点数をかける
 sum_count = list(map(lambda x, y: x + y, counter[0], counter[1]))
+# print(sum_count)
 
 
 # counterの上位25%を取り出す
 criterion = np.percentile(sum_count, 75)
 relation = np.percentile(sum_count, 50)
+# print(criterion)
+# print(relation)
 
 
 # data_list内の単語の出現回数が上位25%の場合出力する
 process_data_list = [data[0] for data in data_list]
 for i, results in enumerate(process_data_list):
-    if sum_count[i] >= criterion:
+    if sum_count[i] > criterion:
         print("検索結果:" + results)
-    elif sum_count[i] >= relation:
+    elif sum_count[i] > relation:
         print("関連情報:" + results)
